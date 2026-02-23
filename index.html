@@ -472,9 +472,17 @@ function slotDur(s){if(!s.from||!s.to||s.from===s.to)return 0;var d=toMins(s.to)
 function slotStatus(slot){
   if(!slot.from||!slot.to||slot.from===slot.to)return 'idle';
   var now=kyivNowMins(),from=toMins(slot.from),to=toMins(slot.to);
-  var inRange;if(to<from){inRange=(now>=from||now<to);}else{inRange=(now>=from&&now<to);}
+  // Put everything on a single linear timeline anchored at shift start
+  // Shift start in minutes
+  var h=kyivHour();
+  var shiftStartM=(h>=7&&h<15)?7*60:(h>=15&&h<23)?15*60:23*60;
+  function norm(m){return m>=shiftStartM?m-shiftStartM:m+1440-shiftStartM;}
+  var nNow=norm(now),nFrom=norm(from),nTo=norm(to);
+  // If to < from on clock it crosses midnight — to on linear timeline must be > from
+  if(nTo<=nFrom)nTo+=1440;
+  var inRange=(nNow>=nFrom&&nNow<nTo);
   if(inRange){return slot.started?'break':'upcoming';}
-  if(now>=to&&!inRange)return 'done';
+  if(nNow>=nTo)return 'done';
   return 'upcoming';
 }
 function rowUsedMins(row){return row.slots.reduce(function(a,s){return a+slotDur(s);},0);}
@@ -539,7 +547,12 @@ function renderAvailableSlots(){
   rows.forEach(function(row){row.slots.forEach(function(s){
     if(!s.from||!s.to||s.from===s.to)return;
     var sFrom=toMins(s.from),sTo=toMins(s.to);if(sTo<=sFrom)sTo+=1440;
-    slots.forEach(function(t){var tM=toMins(t);if(tM>=sFrom&&tM<sTo)slotCounts[t]++;});
+    slots.forEach(function(t){
+      var tM=toMins(t);
+      // For overnight slots after midnight, compare on extended timeline
+      var tMAdj=tM;if(overnight&&tM<shiftStart)tMAdj=tM+1440;
+      if(tMAdj>=sFrom&&tMAdj<sTo)slotCounts[t]++;
+    });
   });});
   function isPast(tM){
     if(!overnight)return tM<nowM-14;
@@ -548,7 +561,21 @@ function renderAvailableSlots(){
     return norm<normNow-14;
   }
   var nowSlot=slots[0];
-  for(var i=slots.length-1;i>=0;i--){if(toMins(slots[i])<=nowM){nowSlot=slots[i];break;}}
+  if(!overnight){
+    for(var i=slots.length-1;i>=0;i--){if(toMins(slots[i])<=nowM){nowSlot=slots[i];break;}}
+  } else {
+    // For overnight: slots are ordered [23:00...23:45, 00:00...06:30]
+    // nowM could be in the 23:xx range or 00:xx range
+    // Normalise each slot time relative to shift start (23:00=0, 00:00=60, etc.)
+    var shiftStartM=shiftStart;
+    function normSlot(tM){return tM>=shiftStartM?tM-shiftStartM:tM+1440-shiftStartM;}
+    var normNow=normSlot(nowM);
+    var bestNorm=-1;
+    slots.forEach(function(t){
+      var n=normSlot(toMins(t));
+      if(n<=normNow&&n>bestNorm){bestNorm=n;nowSlot=t;}
+    });
+  }
   grid.innerHTML='';
   slots.forEach(function(t){
     var tM=toMins(t),count=slotCounts[t]||0,past=isPast(tM),isNow=(t===nowSlot);
