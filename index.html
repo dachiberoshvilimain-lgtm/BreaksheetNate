@@ -132,6 +132,18 @@
   .avail-count{font-size:14px;opacity:0.75;margin-left:2px;}
   .avail-now-marker{position:relative;}
   .avail-now-marker::after{content:'NOW';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--kyiv);letter-spacing:0.5px;font-family:'DM Mono',monospace;}
+  .break-timer-panel{background:var(--on-break-bg);border:1px solid var(--on-break-border);border-radius:14px;padding:14px 20px;margin-bottom:18px;display:none;}
+  .break-timer-panel.visible{display:block;}
+  .break-timer-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--on-break);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+  .break-timer-blink{width:6px;height:6px;border-radius:50%;background:var(--on-break);animation:blink 1s ease-in-out infinite;flex-shrink:0;display:inline-block;}
+  .break-timer-cards{display:flex;flex-wrap:wrap;gap:10px;}
+  .break-timer-card{background:rgba(255,107,53,0.08);border:1px solid rgba(255,107,53,0.22);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:12px;min-width:220px;flex:1;}
+  .break-timer-name{font-size:14px;font-weight:700;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .break-timer-countdown{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--on-break);letter-spacing:1px;white-space:nowrap;}
+  .break-timer-countdown.urgent{color:#ff3b3b;animation:blink 0.8s ease-in-out infinite;}
+  .break-timer-bar-wrap{width:70px;height:4px;background:rgba(255,107,53,0.15);border-radius:2px;overflow:hidden;}
+  .break-timer-bar{height:100%;border-radius:2px;background:var(--on-break);transition:width 1s linear;}
+  .break-timer-bar.urgent{background:#ff3b3b;}
 
   /* ── GUIDE MODAL ── */
   .guide-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
@@ -369,6 +381,11 @@
       <span style="font-size:18px;">👥</span>
       <span><span style="color:var(--text);font-weight:700;letter-spacing:0.3px;">LIMIT:</span> Max 2 agents away at once <span style="color:var(--warning);">(second agent — up to 30 min)</span>. Check the table below!</span>
     </div>
+  </div>
+  <!-- BREAK TIMER PANEL -->
+  <div class="break-timer-panel" id="break-timer-panel">
+    <div class="break-timer-title"><span class="break-timer-blink"></span> Currently On Break</div>
+    <div class="break-timer-cards" id="break-timer-cards"></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="table-wrap">
@@ -790,10 +807,49 @@ document.getElementById('setup-toggle').addEventListener('click',function(){
 function openGuide(){document.getElementById('guide-overlay').className='guide-overlay open';}
 function closeGuide(){document.getElementById('guide-overlay').className='guide-overlay closed';}
 
+function renderBreakTimers(){
+  var panel=document.getElementById('break-timer-panel');
+  var cards=document.getElementById('break-timer-cards');
+  if(!panel||!cards)return;
+  var nowM=kyivNowMins();
+  var active=[];
+  rows.forEach(function(row){
+    if(row.agentIdx<0)return;
+    row.slots.forEach(function(slot){
+      if(!slot.started||slotStatus(slot)!=='break')return;
+      var toM=toMins(slot.to);
+      var minsLeft=toM-nowM;
+      if(minsLeft<0)minsLeft+=1440;
+      var totalDur=slotDur(slot);
+      active.push({name:agents[row.agentIdx],minsLeft:minsLeft,totalDur:totalDur});
+    });
+  });
+  if(active.length===0){panel.classList.remove('visible');return;}
+  panel.classList.add('visible');
+  cards.innerHTML='';
+  active.forEach(function(a){
+    var totalSecs=Math.round(a.minsLeft*60);
+    var m=Math.floor(totalSecs/60),s=totalSecs%60;
+    var isUrgent=a.minsLeft<=5;
+    var pct=Math.max(0,Math.min(100,(a.minsLeft/a.totalDur)*100));
+    var card=document.createElement('div');
+    card.className='break-timer-card';
+    card.innerHTML=
+      '<span style="font-size:18px;">☕</span>'+
+      '<span class="break-timer-name">'+a.name+'</span>'+
+      '<div>'+
+        '<div class="break-timer-countdown'+(isUrgent?' urgent':'')+'">'+pad(m)+':'+pad(s)+'</div>'+
+        '<div class="break-timer-bar-wrap"><div class="break-timer-bar'+(isUrgent?' urgent':'')+'" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+    cards.appendChild(card);
+  });
+}
+
 function updateClock(){
   document.getElementById('clock').textContent=kyivTimeStr();
   document.getElementById('shift-label').textContent=currentShift();
   document.getElementById('cutoff-label').textContent=shiftCutoff();
+  renderBreakTimers();
 }
 setInterval(updateClock,1000);
 setInterval(render,10000);
