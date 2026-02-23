@@ -55,6 +55,21 @@
   select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:5px 22px 5px 7px;outline:none;cursor:pointer;width:78px;transition:border-color 0.2s;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5L9 0z' fill='%236b7080'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;}
   select:focus{border-color:var(--accent);}
   select.agent-select{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;width:170px;}
+  .agent-dropdown{position:relative;width:170px;user-select:none;}
+  .agent-dropdown-trigger{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:5px 26px 5px 9px;cursor:pointer;display:flex;align-items:center;gap:6px;width:100%;transition:border-color 0.2s;position:relative;}
+  .agent-dropdown-trigger::after{content:'';position:absolute;right:9px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--muted);pointer-events:none;}
+  .agent-dropdown-trigger:hover{border-color:var(--accent);}
+  .agent-dropdown-menu{position:absolute;top:calc(100% + 4px);left:0;width:220px;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.4);overflow:hidden;display:none;}
+  .agent-dropdown-menu.open{display:block;}
+  .agent-dropdown-search{padding:8px;border-bottom:1px solid var(--border);}
+  .agent-dropdown-search input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;padding:6px 10px;outline:none;box-sizing:border-box;}
+  .agent-dropdown-search input:focus{border-color:var(--accent);}
+  .agent-dropdown-list{max-height:200px;overflow-y:auto;}
+  .agent-dropdown-item{padding:7px 12px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:background 0.12s;}
+  .agent-dropdown-item:hover{background:var(--surface2);}
+  .agent-dropdown-item.selected{color:var(--accent);}
+  .agent-dropdown-item.placeholder{color:var(--muted);font-weight:400;}
+  .agent-dropdown-item.hidden{display:none;}
   .break-progress-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:140px;}
   .break-bar-bg{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;min-width:60px;}
   .break-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease;background:linear-gradient(90deg,var(--accent),var(--accent2));}
@@ -457,7 +472,15 @@ function render(){
     wrap.innerHTML=
       '<div class="agent-header">'+
         '<span class="agent-row-num">'+(ri+1)+'</span>'+
-        '<select class="agent-select" onchange="setAgent('+ri+',this.value)">'+buildAgentOpts(row.agentIdx)+'</select>'+
+        '<div class="agent-dropdown" id="dd-'+ri+'">'+
+          '<div class="agent-dropdown-trigger" onclick="toggleDropdown('+ri+')">'+
+            '<span id="dd-label-'+ri+'">'+(row.agentIdx>=0&&agents[row.agentIdx]?agents[row.agentIdx]:'— select agent —')+'</span>'+
+          '</div>'+
+          '<div class="agent-dropdown-menu" id="dd-menu-'+ri+'">'+
+            '<div class="agent-dropdown-search"><input type="text" placeholder="Search agent..." oninput="filterDropdown('+ri+',this.value)" id="dd-search-'+ri+'"/></div>'+
+            '<div class="agent-dropdown-list" id="dd-list-'+ri+'">'+buildDropdownItems(ri,row.agentIdx)+'</div>'+
+          '</div>'+
+        '</div>'+
         '<button class="row-clear-btn" onclick="clearRow('+ri+')"'+(row.agentIdx<0?' disabled':'')+'>Clear</button>'+
         '<div class="break-progress-wrap">'+
           '<div class="break-bar-bg"><div class="break-bar-fill '+barCls+'" style="width:'+pct+'%"></div></div>'+
@@ -525,7 +548,55 @@ function render(){
 // ═══════════════════════════════════════════════════════════════
 //  DATA SETTERS
 // ═══════════════════════════════════════════════════════════════
-function setAgent(ri,val){rows[ri].agentIdx=parseInt(val);pushRows();render();}
+function buildDropdownItems(ri, selIdx){
+  var used=new Set(rows.map(function(r){return r.agentIdx;}).filter(function(i){return i>=0;}));
+  var html='<div class="agent-dropdown-item placeholder" onclick="selectAgent('+ri+',-1)">— select agent —</div>';
+  agents.forEach(function(name,i){
+    if(!name.trim())return;
+    if(used.has(i)&&i!==selIdx)return;
+    html+='<div class="agent-dropdown-item'+(i===selIdx?' selected':'')+'" onclick="selectAgent('+ri+','+i+')">'+name+'</div>';
+  });
+  return html;
+}
+
+function toggleDropdown(ri){
+  // Close all others first
+  document.querySelectorAll('.agent-dropdown-menu.open').forEach(function(m){
+    if(m.id!=='dd-menu-'+ri)m.classList.remove('open');
+  });
+  var menu=document.getElementById('dd-menu-'+ri);
+  if(!menu)return;
+  menu.classList.toggle('open');
+  if(menu.classList.contains('open')){
+    var inp=document.getElementById('dd-search-'+ri);
+    if(inp){inp.value='';filterDropdown(ri,'');setTimeout(function(){inp.focus();},50);}
+  }
+}
+
+function filterDropdown(ri, query){
+  var list=document.getElementById('dd-list-'+ri);
+  if(!list)return;
+  var q=query.toLowerCase().trim();
+  list.querySelectorAll('.agent-dropdown-item').forEach(function(item){
+    if(!q||item.textContent.toLowerCase().includes(q)){item.classList.remove('hidden');}
+    else{item.classList.add('hidden');}
+  });
+}
+
+function selectAgent(ri, idx){
+  setAgent(ri, idx);
+  var menu=document.getElementById('dd-menu-'+ri);
+  if(menu)menu.classList.remove('open');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.agent-dropdown')){
+    document.querySelectorAll('.agent-dropdown-menu.open').forEach(function(m){m.classList.remove('open');});
+  }
+});
+
+
 
 function parseTimeInput(val){
   val=val.trim().replace(/[^0-9:]/g,'');
