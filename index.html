@@ -133,6 +133,43 @@
   .avail-now-marker{position:relative;}
   .avail-now-marker::after{content:'NOW';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--kyiv);letter-spacing:0.5px;font-family:'DM Mono',monospace;}
 
+  /* ── GUIDE MODAL ── */
+  .guide-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+  .guide-overlay.open{display:flex;}
+  .guide-overlay.closed{display:none;}
+  .guide-modal{background:#1a1d27;border:1px solid #2a2d3a;border-radius:18px;max-width:700px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.7);}
+  .guide-head{padding:26px 30px 18px;border-bottom:1px solid #2a2d3a;flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .guide-head-title{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;background:linear-gradient(135deg,#6c63ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+  .guide-head-sub{font-size:13px;color:#6b7080;}
+  .guide-close-btn{background:transparent;border:1px solid #2a2d3a;border-radius:8px;color:#6b7080;cursor:pointer;font-size:16px;padding:5px 11px;flex-shrink:0;transition:border-color 0.2s;font-family:'Syne',sans-serif;}
+  .guide-close-btn:hover{color:#e8eaf0;border-color:#6c63ff;}
+  .guide-body{overflow-y:auto;padding:24px 30px;display:flex;flex-direction:column;gap:22px;line-height:1.7;}
+  .guide-section{display:flex;flex-direction:column;gap:0;}
+  .guide-section-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6c63ff;margin-bottom:8px;font-family:'Syne',sans-serif;}
+  .guide-text{font-size:14px;color:#c8ccd8;}
+  .guide-text strong{color:#fff;}
+  .guide-text em{color:#a78bfa;font-style:normal;}
+  .guide-cards{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+  .guide-card{background:#232635;border-radius:10px;padding:14px 16px;border:1px solid #2a2d3a;}
+  .guide-card-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+  .guide-card-title.green{color:#22c55e;}
+  .guide-card-title.purple{color:#a78bfa;}
+  .guide-card-body{font-size:13px;color:#9ca3af;}
+  .guide-card-body strong{color:#fff;}
+  .guide-rules-box{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:18px 20px;}
+  .guide-rules-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#f59e0b;margin-bottom:12px;font-family:'Syne',sans-serif;}
+  .guide-rules-list{display:flex;flex-direction:column;gap:8px;font-size:13px;color:#c8ccd8;}
+  .guide-rules-list div strong{color:#fff;}
+  .guide-other-list{display:flex;flex-direction:column;gap:8px;font-size:14px;color:#c8ccd8;}
+  .guide-other-list div strong{color:#fff;}
+  .guide-foot{padding:16px 30px;border-top:1px solid #2a2d3a;flex-shrink:0;display:flex;justify-content:flex-end;}
+  .guide-go-btn{background:linear-gradient(135deg,#6c63ff,#a78bfa);border:none;border-radius:9px;color:#fff;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:10px 28px;transition:opacity 0.2s;}
+  .guide-go-btn:hover{opacity:0.85;}
+  .tag{background:#1a1d27;border:1px solid #2a2d3a;border-radius:5px;padding:1px 7px;font-family:'DM Mono',monospace;font-size:13px;color:#c8ccd8;}
+  .pill-g{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:5px;padding:1px 8px;font-size:12px;color:#22c55e;font-weight:700;}
+  .pill-o{background:rgba(255,107,53,0.15);border:1px solid rgba(255,107,53,0.4);border-radius:5px;padding:1px 8px;font-size:12px;color:#ff6b35;font-weight:700;}
+  .flow{display:inline-flex;align-items:center;gap:6px;background:#232635;border:1px solid #2a2d3a;border-radius:8px;padding:6px 12px;font-size:13px;color:#c8ccd8;margin-top:8px;}
+  .flow-arrow{color:#6c63ff;font-weight:700;}
 </style>
 </head>
 <body>
@@ -142,13 +179,161 @@
     <div class="logo">⏸ Break Sheet</div>
     <div class="live-dot"><span class="dot"></span> LIVE</div>
   </div>
-  <div class="kyiv-clock">
-    <span style="font-size:15px;">🇺🇦</span>
-    <span class="kyiv-label">Kyiv Time</span>
-    <span class="kyiv-time" id="clock">--:--:--</span>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="kyiv-clock">
+      <span style="font-size:15px;">🇺🇦</span>
+      <span class="kyiv-label">Kyiv Time</span>
+      <span class="kyiv-time" id="clock">--:--:--</span>
+    </div>
+    <button onclick="openGuide()" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(79,124,255,0.15),rgba(124,92,252,0.15));border:1.5px solid rgba(79,124,255,0.45);border-radius:22px;color:#a5b4fc;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:7px 16px;transition:all 0.2s;letter-spacing:0.3px;white-space:nowrap;" onmouseover="this.style.background='linear-gradient(135deg,rgba(79,124,255,0.28),rgba(124,92,252,0.28))';this.style.borderColor='rgba(79,124,255,0.8)';this.style.color='#c4b5fd'" onmouseout="this.style.background='linear-gradient(135deg,rgba(79,124,255,0.15),rgba(124,92,252,0.15))';this.style.borderColor='rgba(79,124,255,0.45)';this.style.color='#a5b4fc'">📋 Guide</button>
   </div>
   <div class="shift-indicator">Shift: <span id="shift-label">--</span> &nbsp;·&nbsp; Cutoff: <span id="cutoff-label">--</span></div>
 </header>
+
+<!-- ══════════════════════════════════════════
+     GUIDE MODAL — single instance, toggled via JS
+     ══════════════════════════════════════════ -->
+<div class="guide-overlay closed" id="guide-overlay" onclick="if(event.target===this)closeGuide()">
+  <div class="guide-modal">
+
+    <div class="guide-head">
+      <div>
+        <div class="guide-head-title">📋 Break Sheet — How It Works</div>
+        <div class="guide-head-sub">Read this before you start. It covers everything.</div>
+      </div>
+      <button class="guide-close-btn" onclick="closeGuide()">✕</button>
+    </div>
+
+    <div class="guide-body">
+
+      <!-- IMPORTANT -->
+      <div class="guide-section">
+        <div class="guide-section-label">⚡ First — Two Important Things</div>
+        <div class="guide-cards">
+          <div class="guide-card">
+            <div class="guide-card-title green">1 · It's fully live</div>
+            <div class="guide-card-body">We are all on the same screen. If you book a break — everyone sees it instantly. If you press Start or Stop — everyone sees it instantly. <strong>No saving. No refreshing.</strong> It just syncs automatically.</div>
+          </div>
+          <div class="guide-card">
+            <div class="guide-card-title purple">2 · Everything is Kyiv time</div>
+            <div class="guide-card-body">Use the Kyiv clock in the <strong>top right corner</strong>. Not your laptop. Not your phone. <strong>The screen clock.</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAYOUT -->
+      <div class="guide-section">
+        <div class="guide-section-label">🖥 What You're Looking At</div>
+        <div class="guide-text">
+          The <strong>top bar</strong> shows the Kyiv clock in the middle, and your current shift + cutoff time on the right — so you always know how much time is left.<br><br>
+          Below that is the <strong>Available Break Slots grid</strong> — the fastest way to see open times and book a break.<br><br>
+          Below that is a <strong>policy reminder bar</strong> summarising the main rules.<br><br>
+          The <strong>main table</strong> is split into two columns — Rows 1–5 on the left, Rows 6–10 on the right. One row per agent.<br><br>
+          At the <strong>very bottom</strong> are live stats: who's on break right now, who's finished, planned breaks, and total agents loaded.
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="guide-section">
+        <div class="guide-section-label">① Select Your Name</div>
+        <div class="guide-text">
+          Pick any empty row (1–10). Click the dropdown that says <span class="tag">— select agent —</span>. Start typing your name to filter the list, then click it to select.<br><br>
+          <strong>That row is now yours for this session.</strong><br><br>
+          If your name isn't there — tell a supervisor. We can add it instantly in the Agent Setup panel.
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="guide-section">
+        <div class="guide-section-label">② Your Row Activates Automatically</div>
+        <div class="guide-text">
+          As soon as you select your name, your row activates automatically — you'll see the blue outline appear straight away. No extra click needed.<br><br>
+          You can also click anywhere on a row header to manually switch your active row — useful if you need to help someone else or correct a different row.<br><br>
+          The habit is:
+        </div>
+        <div class="flow">
+          <span>Select name</span>
+          <span class="flow-arrow">→</span>
+          <span>Row activates (blue outline)</span>
+          <span class="flow-arrow">→</span>
+          <span>Book break</span>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="guide-section">
+        <div class="guide-section-label">③ Booking Your Break</div>
+        <div class="guide-text">You get <strong>60 minutes total</strong> and up to <strong>3 slots</strong>. Split however you want — 60, 30+30, 20+20+20, etc. Just don't go over 60 minutes.</div>
+        <div class="guide-cards" style="margin-top:12px;">
+          <div class="guide-card">
+            <div class="guide-card-title green">🟢 Option A — Use the Grid (Fastest)</div>
+            <div class="guide-card-body">
+              Each block in the grid = 15 minutes.<br><br>
+              🟢 <strong>Green</strong> = Free &nbsp;·&nbsp; 🟠 <strong>Amber</strong> = 1 person booked (1 spot left) &nbsp;·&nbsp; 🔴 <strong>Red / crossed out</strong> = Full &nbsp;·&nbsp; <strong>Grey</strong> = Time already passed &nbsp;·&nbsp; <strong style="color:#38bdf8;">Light blue NOW</strong> = Current window<br><br>
+              <strong>Make sure your row is active.</strong> Then: 1st click = start time. 2nd click = end time. Done — it fills into your next empty slot automatically. If it breaks a rule, it flashes red. Just pick another time.
+            </div>
+          </div>
+          <div class="guide-card">
+            <div class="guide-card-title purple">⌨️ Option B — Type Manually</div>
+            <div class="guide-card-body">
+              Each slot has a start and end time box in <strong>HH:MM</strong> format. Type 2 digits for the hour — it jumps to minutes automatically. Type 2 digits for minutes, then press Tab or click away to save.<br><br>
+              If valid → saves instantly. If not → turns red and clears. Try a different time.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="guide-section">
+        <div class="guide-section-label">④ Start & Stop Your Break</div>
+        <div class="guide-text">
+          <strong>Booking a slot ≠ being on break.</strong><br><br>
+          Once both times are filled, a <span class="pill-g">▶ Start</span> button appears. Press it when you're <em>actually walking away</em> — it shifts your break to begin right now while keeping the same duration.<br><br>
+          Example: You booked <strong>13:00–13:30</strong>. You press Start at <strong>13:05</strong>. It becomes <strong>13:05–13:35</strong>.<br><br>
+          When you return, press <span class="pill-o">■ Stop</span>. That locks the end time to right now and marks the slot as done.
+        </div>
+      </div>
+
+      <!-- CLEAR BUTTONS -->
+      <div class="guide-section">
+        <div class="guide-section-label">🗑 Clear Buttons</div>
+        <div class="guide-other-list">
+          <div><strong>Slot Clear</strong> — removes just that one break slot. Everything else stays.</div>
+          <div><strong>Row Clear</strong> — wipes the agent name and all 3 slots for that row. Use if you need to start fresh.</div>
+          <div><strong>Clear All Rows</strong> — resets every single row. <strong>Supervisors only.</strong> Used at the start of a new shift.</div>
+        </div>
+      </div>
+
+      <!-- RULES -->
+      <div class="guide-rules-box">
+        <div class="guide-rules-label">⚠️ Rules — Automatically Enforced</div>
+        <div class="guide-rules-list">
+          <div>🍱 <strong>No breaks in the last 30 minutes of any shift.</strong> Blocked times: 14:30–15:00, 22:30–23:00, 06:30–07:00.</div>
+          <div>👥 <strong>Max 2 agents on break at the same time.</strong> A 3rd person cannot book into a full window.</div>
+          <div>⏱ <strong>Two agents can only overlap for up to 30 minutes.</strong> If agent A is on 05:00–06:00, agent B can only share 30 min of that (e.g. 05:30–06:00 is fine, 05:00–05:45 is not).</div>
+          <div>🕐 <strong>Max 60 minutes total</strong> per agent per shift, across all 3 slots combined.</div>
+        </div>
+      </div>
+
+      <!-- OTHER -->
+      <div class="guide-section">
+        <div class="guide-section-label">⑤ Other Things to Know</div>
+        <div class="guide-other-list">
+          <div>🔴 <strong>Red input</strong> = time rejected (breaks a rule). Try a different time.</div>
+          <div>🌐 <strong>Everything syncs live</strong> — every change is visible to everyone instantly.</div>
+          <div>🕓 <strong>All times are Kyiv time</strong> — shown in the top-right clock. Use that, not your device.</div>
+          <div>➕ <strong>Name not in the list?</strong> Tell a supervisor. Open Agent Setup, type the name, press Save & Apply — syncs for everyone immediately.</div>
+        </div>
+      </div>
+
+    </div><!-- /guide-body -->
+
+    <div class="guide-foot">
+      <button class="guide-go-btn" onclick="closeGuide()">Got it, let's go →</button>
+    </div>
+
+  </div><!-- /guide-modal -->
+</div><!-- /guide-overlay -->
 
 <div class="main">
   <div class="avail-panel" id="avail-panel">
@@ -164,10 +349,10 @@
   </div>
   <div class="overlap-banner" id="overlap-banner">⚠️ <span id="overlap-msg"></span></div>
   <div class="setup-panel">
-  <div style="display:flex;align-items:center;gap:12px;">
-    <div class="setup-title collapsed" id="setup-toggle" style="flex:1;">Agent Setup</div>
-    <button onclick="clearAll()" style="border:1px solid rgba(255,107,53,0.4);border-radius:7px;background:rgba(255,107,53,0.08);color:var(--on-break);cursor:pointer;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;padding:6px 16px;transition:all 0.18s;white-space:nowrap;" onmouseover="this.style.background='rgba(255,107,53,0.18)'" onmouseout="this.style.background='rgba(255,107,53,0.08)'">⚠ Clear All Rows</button>
-  </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="setup-title collapsed" id="setup-toggle" style="flex:1;">Agent Setup</div>
+      <button onclick="clearAll()" style="border:1px solid rgba(255,107,53,0.4);border-radius:7px;background:rgba(255,107,53,0.08);color:var(--on-break);cursor:pointer;font-size:11px;font-weight:700;font-family:'Syne',sans-serif;padding:6px 16px;transition:all 0.18s;white-space:nowrap;" onmouseover="this.style.background='rgba(255,107,53,0.18)'" onmouseout="this.style.background='rgba(255,107,53,0.08)'">⚠ Clear All Rows</button>
+    </div>
     <div class="setup-content hidden" id="setup-content">
       <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Edit agent names here. Changes sync live for everyone.</p>
       <div class="agents-grid" id="agents-grid"></div>
@@ -211,63 +396,29 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-//  🔥 YOUR FIREBASE DATABASE URL — already set!
-// ═══════════════════════════════════════════════════════════════
 var DB_URL = 'https://breaksheet-642ee-default-rtdb.europe-west1.firebasedatabase.app';
 
-// ═══════════════════════════════════════════════════════════════
-//  FIREBASE REST API  (no SDK needed — works from any local file)
-// ═══════════════════════════════════════════════════════════════
-function fbGet(path){
-  return fetch(DB_URL+path+'.json').then(function(r){return r.json();});
-}
-function fbSet(path,data){
-  return fetch(DB_URL+path+'.json',{
-    method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
-  }).then(function(r){return r.json();});
-}
+function fbGet(path){return fetch(DB_URL+path+'.json').then(function(r){return r.json();});}
+function fbSet(path,data){return fetch(DB_URL+path+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.json();});}
 
-// Server-Sent Events for real-time push updates
-var rowsSSE=null, agentsSSE=null;
-
+var rowsSSE=null,agentsSSE=null;
 function startSSE(){
-  if(rowsSSE) rowsSSE.close();
+  if(rowsSSE)rowsSSE.close();
   rowsSSE=new EventSource(DB_URL+'/rows.json?accept=text/event-stream');
-  rowsSSE.addEventListener('put',function(e){
-    try{
-      var d=JSON.parse(e.data);
-      if(d && d.data && Array.isArray(d.data)){ rows=d.data; render(); }
-    }catch(err){}
-    setSyncStatus('ok');
-  });
+  rowsSSE.addEventListener('put',function(e){try{var d=JSON.parse(e.data);if(d&&d.data&&Array.isArray(d.data)){rows=d.data;render();}}catch(err){}setSyncStatus('ok');});
   rowsSSE.onerror=function(){setSyncStatus('err');};
-
-  if(agentsSSE) agentsSSE.close();
+  if(agentsSSE)agentsSSE.close();
   agentsSSE=new EventSource(DB_URL+'/agents.json?accept=text/event-stream');
-  agentsSSE.addEventListener('put',function(e){
-    try{
-      var d=JSON.parse(e.data);
-      if(d && d.data && Array.isArray(d.data)){
-        agents=d.data;
-        while(agents.length<40)agents.push('');
-        renderSetup(); render();
-      }
-    }catch(err){}
-  });
+  agentsSSE.addEventListener('put',function(e){try{var d=JSON.parse(e.data);if(d&&d.data&&Array.isArray(d.data)){agents=d.data;while(agents.length<40)agents.push('');renderSetup();render();}}catch(err){}});
 }
 
 function setSyncStatus(state){
-  var dot=document.getElementById('sync-dot');
-  var lbl=document.getElementById('sync-label');
+  var dot=document.getElementById('sync-dot'),lbl=document.getElementById('sync-label');
   if(state==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Syncing...';}
   else if(state==='ok'){dot.className='sync-dot';lbl.textContent='Live ✓';}
   else{dot.className='sync-dot err';lbl.textContent='Offline';}
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  APP DATA
-// ═══════════════════════════════════════════════════════════════
 var DEFAULT_AGENTS=[
   "Mariam - Adeline","Stacy - Alina","Chloe - Amanda","Mason - Andrew","James - Andrian",
   "Jacob - Artur","Dmytro - Bruce","Den - Denys","Deren - Dmytro","Mira - Elena",
@@ -276,35 +427,23 @@ var DEFAULT_AGENTS=[
   "Nataly - Natia","Matthew - Samir","Jack - Sergii","Gerald - Tarlan","Lina - Tina",
   "Iris - Tsira","Emily - Valeria","Lili - Viktoriia","Millie - Yulia"
 ];
-var MAX_BREAK=60, MAX_SLOTS=3, NUM_ROWS=10;
-var agents=DEFAULT_AGENTS.slice(); while(agents.length<40)agents.push('');
-function initRows(){ return Array.from({length:NUM_ROWS},function(_,i){ return {id:i,agentIdx:-1,slots:Array.from({length:MAX_SLOTS},function(){return {from:'',to:'',started:false};}) }; }); }
+var MAX_BREAK=60,MAX_SLOTS=3,NUM_ROWS=10;
+var agents=DEFAULT_AGENTS.slice();while(agents.length<40)agents.push('');
+function initRows(){return Array.from({length:NUM_ROWS},function(_,i){return{id:i,agentIdx:-1,slots:Array.from({length:MAX_SLOTS},function(){return{from:'',to:'',started:false};})};});}
 var rows=initRows();
 
-// ── Boot: load from Firebase then start SSE ──
 function initApp(){
   setSyncStatus('syncing');
   Promise.all([fbGet('/rows'),fbGet('/agents')]).then(function(res){
-    if(res[0]&&Array.isArray(res[0])) rows=res[0];
-    if(res[1]&&Array.isArray(res[1])){ agents=res[1]; while(agents.length<40)agents.push(''); }
-    renderSetup(); render(); setSyncStatus('ok');
-    startSSE();
-  }).catch(function(e){
-    console.error(e);
-    setSyncStatus('err');
-    renderSetup(); render();
-  });
+    if(res[0]&&Array.isArray(res[0]))rows=res[0];
+    if(res[1]&&Array.isArray(res[1])){agents=res[1];while(agents.length<40)agents.push('');}
+    renderSetup();render();setSyncStatus('ok');startSSE();
+  }).catch(function(e){console.error(e);setSyncStatus('err');renderSetup();render();});
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  WRITE TO FIREBASE
-// ═══════════════════════════════════════════════════════════════
-function pushRows(){ setSyncStatus('syncing'); fbSet('/rows',rows).then(function(){setSyncStatus('ok');}).catch(function(){setSyncStatus('err');}); }
-function pushAgents(){ setSyncStatus('syncing'); fbSet('/agents',agents).then(function(){setSyncStatus('ok');}).catch(function(){setSyncStatus('err');}); }
+function pushRows(){setSyncStatus('syncing');fbSet('/rows',rows).then(function(){setSyncStatus('ok');}).catch(function(){setSyncStatus('err');});}
+function pushAgents(){setSyncStatus('syncing');fbSet('/agents',agents).then(function(){setSyncStatus('ok');}).catch(function(){setSyncStatus('err');});}
 
-// ═══════════════════════════════════════════════════════════════
-//  TIME HELPERS
-// ═══════════════════════════════════════════════════════════════
 function pad(n){return String(n).padStart(2,'0');}
 function kyivNowMins(){var s=new Date().toLocaleTimeString('uk-UA',{timeZone:'Europe/Kyiv',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});var p=s.split(':').map(Number);return p[0]*60+p[1]+p[2]/60;}
 function kyivTimeStr(){return new Date().toLocaleTimeString('uk-UA',{timeZone:'Europe/Kyiv',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
@@ -316,11 +455,9 @@ function slotDur(s){if(!s.from||!s.to||s.from===s.to)return 0;var d=toMins(s.to)
 function slotStatus(slot){
   if(!slot.from||!slot.to||slot.from===slot.to)return 'idle';
   var now=kyivNowMins(),from=toMins(slot.from),to=toMins(slot.to);
-  var timeInRange;
-  if(to<from){timeInRange=(now>=from||now<to);}
-  else{timeInRange=(now>=from&&now<to);}
-  if(timeInRange){return slot.started?'break':'upcoming';}
-  if(now>=to&&!timeInRange)return 'done';
+  var inRange;if(to<from){inRange=(now>=from||now<to);}else{inRange=(now>=from&&now<to);}
+  if(inRange){return slot.started?'break':'upcoming';}
+  if(now>=to&&!inRange)return 'done';
   return 'upcoming';
 }
 function rowUsedMins(row){return row.slots.reduce(function(a,s){return a+slotDur(s);},0);}
@@ -328,75 +465,30 @@ function rowDoneMins(row){return row.slots.reduce(function(a,s){return slotStatu
 function rowFinished(row){return rowDoneMins(row)>=MAX_BREAK;}
 function countOnBreakNow(){var c=0;rows.forEach(function(row){if(row.agentIdx<0)return;row.slots.forEach(function(s){if(slotStatus(s)==='break')c++;});});return c;}
 
-// ═══════════════════════════════════════════════════════════════
-//  TIME DROPDOWNS
-// ═══════════════════════════════════════════════════════════════
 var ALL_TIMES=(function(){var t=[];for(var h=7;h<24;h++)for(var m=0;m<60;m+=15)t.push(pad(h)+':'+pad(m));for(var h=0;h<7;h++)for(var m=0;m<60;m+=15)t.push(pad(h)+':'+pad(m));return t;})();
-
-function buildTimeOpts(sel,cutoffMins,strictCutoff,fromMins,maxMins,blockedTimes,excludeRi,excludeSi){
-  return '<option value="">--:--</option>'+ALL_TIMES.map(function(t){
-    var tMins=toMins(t),disabled=false,tag='';
-    if(cutoffMins!==undefined){var bc=strictCutoff?(tMins>=cutoffMins):(tMins>cutoffMins);if(bc){disabled=true;tag=' ✗';}}
-    if(!disabled&&fromMins!==undefined&&maxMins!==undefined){
-      if(tMins===fromMins){disabled=true;}
-      else{var dur=tMins-fromMins;if(dur<0)dur+=1440;if(dur>maxMins){disabled=true;tag=' ✗';}}
-    }
-    if(!disabled&&blockedTimes&&blockedTimes[t]){disabled=true;tag=' ✗';}
-    if(!disabled&&fromMins!==undefined&&excludeRi!==undefined){
-      var toM=tMins;if(toM<=fromMins)toM+=1440;
-      if(wouldCauseOverlap(excludeRi,excludeSi,fromMins,toM)){disabled=true;tag=' ✗';}
-    }
-    return '<option value="'+t+'"'+(t===sel?' selected':'')+(disabled?' disabled':'')+'>'+t+tag+'</option>';
-  }).join('');
-}
-
-function buildAgentOpts(selIdx){
-  var used=new Set(rows.map(function(r){return r.agentIdx;}).filter(function(i){return i>=0;}));
-  var h='<option value="-1">— select agent —</option>';
-  agents.forEach(function(name,i){
-    if(!name.trim())return;if(used.has(i)&&i!==selIdx)return;
-    h+='<option value="'+i+'"'+(i===selIdx?' selected':'')+'>'+name+'</option>';
-  });
-  return h;
-}
 
 function wouldCauseOverlap(excludeRi,excludeSi,fromM,toM){
   if(fromM<0||toM<0)return false;
   if(toM<=fromM)toM+=1440;
   if(toM===fromM)return false;
-
   for(var ri=0;ri<rows.length;ri++){
-    var row=rows[ri];
-    if(row.agentIdx<0)continue;
+    var row=rows[ri];if(row.agentIdx<0)continue;
     for(var si=0;si<row.slots.length;si++){
       if(ri===excludeRi&&si===excludeSi)continue;
-      var s=row.slots[si];
-      if(!s.from||!s.to||s.from===s.to)continue;
-      var sF=toMins(s.from),sT=toMins(s.to);
-      if(sT<=sF)sT+=1440;
-
-      // Count how many minutes overlap with this slot
-      var oStart=Math.max(fromM,sF);
-      var oEnd=Math.min(toM,sT);
-      var overlapMins=Math.max(0,oEnd-oStart);
-
-      // Rule: no shared break time exceeding 30 min with any single person
+      var s=row.slots[si];if(!s.from||!s.to||s.from===s.to)continue;
+      var sF=toMins(s.from),sT=toMins(s.to);if(sT<=sF)sT+=1440;
+      var oStart=Math.max(fromM,sF),oEnd=Math.min(toM,sT),overlapMins=Math.max(0,oEnd-oStart);
       if(overlapMins>30)return true;
     }
   }
-
-  // Rule: no more than 2 people on break at any single minute
   for(var t=fromM;t<toM;t++){
     var count=0;
     for(var ri=0;ri<rows.length;ri++){
-      var row=rows[ri];
-      if(row.agentIdx<0)continue;
+      var row=rows[ri];if(row.agentIdx<0)continue;
       for(var si=0;si<row.slots.length;si++){
         if(ri===excludeRi&&si===excludeSi)continue;
-        var s=row.slots[si];
-        if(!s.from||!s.to||s.from===s.to)continue;
-        var sF=toMins(s.from),sT=toMins(s.to);
-        if(sT<=sF)sT+=1440;
+        var s=row.slots[si];if(!s.from||!s.to||s.from===s.to)continue;
+        var sF=toMins(s.from),sT=toMins(s.to);if(sT<=sF)sT+=1440;
         if(t>=sF&&t<sT)count++;
       }
     }
@@ -415,76 +507,43 @@ function getBlockedFromTimes(excludeRi,excludeSi){
   return blocked;
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  AVAILABLE SLOTS PANEL
-// ═══════════════════════════════════════════════════════════════
 function renderAvailableSlots(){
   var grid=document.getElementById('avail-grid');if(!grid)return;
-  var h=kyivHour();
-  var nowM=kyivNowMins();
-
+  var h=kyivHour(),nowM=kyivNowMins();
   var shiftStart,shiftEnd,overnight;
   if(h>=7&&h<15){shiftStart=7*60;shiftEnd=14*60+45;overnight=false;}
   else if(h>=15&&h<23){shiftStart=15*60;shiftEnd=22*60+45;overnight=false;}
   else{shiftStart=23*60;shiftEnd=6*60+45;overnight=true;}
-
-  function inShift(tM){
-    if(!overnight) return tM>=shiftStart&&tM<shiftEnd;
-    return tM>=shiftStart||tM<shiftEnd;
-  }
-
-  // Build ordered slot list for current shift only
+  function inShift(tM){if(!overnight)return tM>=shiftStart&&tM<shiftEnd;return tM>=shiftStart||tM<shiftEnd;}
   var slots=[];
-  if(!overnight){
-    ALL_TIMES.forEach(function(t){if(inShift(toMins(t)))slots.push(t);});
-  } else {
-    ALL_TIMES.forEach(function(t){var tM=toMins(t);if(tM>=shiftStart)slots.push(t);});
-    ALL_TIMES.forEach(function(t){var tM=toMins(t);if(tM<shiftEnd)slots.push(t);});
-  }
-
-  // Count agents overlapping each slot (include rows even without agent selected)
-  var slotCounts={};
-  slots.forEach(function(t){slotCounts[t]=0;});
-  rows.forEach(function(row){
-    row.slots.forEach(function(s){
-      if(!s.from||!s.to||s.from===s.to)return;
-      var sFrom=toMins(s.from),sTo=toMins(s.to);
-      if(sTo<=sFrom)sTo+=1440;
-      slots.forEach(function(t){
-        var tM=toMins(t);
-        if(tM>=sFrom&&tM<sTo)slotCounts[t]++;
-      });
-    });
-  });
-
+  if(!overnight){ALL_TIMES.forEach(function(t){if(inShift(toMins(t)))slots.push(t);});}
+  else{ALL_TIMES.forEach(function(t){var tM=toMins(t);if(tM>=shiftStart)slots.push(t);});ALL_TIMES.forEach(function(t){var tM=toMins(t);if(tM<shiftEnd)slots.push(t);});}
+  var slotCounts={};slots.forEach(function(t){slotCounts[t]=0;});
+  rows.forEach(function(row){row.slots.forEach(function(s){
+    if(!s.from||!s.to||s.from===s.to)return;
+    var sFrom=toMins(s.from),sTo=toMins(s.to);if(sTo<=sFrom)sTo+=1440;
+    slots.forEach(function(t){var tM=toMins(t);if(tM>=sFrom&&tM<sTo)slotCounts[t]++;});
+  });});
   function isPast(tM){
-    if(!overnight) return tM<nowM-14;
+    if(!overnight)return tM<nowM-14;
     var norm=tM>=shiftStart?tM-shiftStart:tM+1440-shiftStart;
     var normNow=nowM>=shiftStart?nowM-shiftStart:nowM+1440-shiftStart;
     return norm<normNow-14;
   }
-
   var nowSlot=slots[0];
-  for(var i=slots.length-1;i>=0;i--){
-    if(toMins(slots[i])<=nowM){nowSlot=slots[i];break;}
-  }
-
+  for(var i=slots.length-1;i>=0;i--){if(toMins(slots[i])<=nowM){nowSlot=slots[i];break;}}
   grid.innerHTML='';
   slots.forEach(function(t){
-    var tM=toMins(t);
-    var count=slotCounts[t]||0;
-    var past=isPast(tM);
-    var isNow=(t===nowSlot);
+    var tM=toMins(t),count=slotCounts[t]||0,past=isPast(tM),isNow=(t===nowSlot);
     var cls='avail-slot ';
-    if(past) cls+='avail-past';
-    else if(count>=2) cls+='avail-full';
-    else if(count===1) cls+='avail-one';
+    if(past)cls+='avail-past';
+    else if(count>=2)cls+='avail-full';
+    else if(count===1)cls+='avail-one';
     else cls+='avail-free';
-    var isClickable=!past&&count<2;
-    var isPendingFrom=pendingFrom&&pendingFrom.time===t;
+    var isClickable=!past&&count<2,isPendingFrom=pendingFrom&&pendingFrom.time===t;
     if(isClickable)cls+=' clickable';
     if(isPendingFrom)cls+=' selected-from';
-    if(isNow) cls+=' avail-now-marker';
+    if(isNow)cls+=' avail-now-marker';
     var badge=(!past&&count>0)?'<span class="avail-count">'+count+'/2</span>':'';
     var div=document.createElement('div');
     div.className=cls;
@@ -495,97 +554,89 @@ function renderAvailableSlots(){
   });
 }
 
-
-// Track pending from-time click state: {ri, si, time}
-var pendingFrom=null;
-var activeRow=-1; // which row the current user is working on
-
+var pendingFrom=null,activeRow=-1;
 function setActiveRow(ri){
-  activeRow=ri;
-  pendingFrom=null;
-  // Update visual highlight
-  document.querySelectorAll('.agent-row').forEach(function(el,i){
-    el.classList.toggle('active-row', i===ri);
-  });
+  activeRow=ri;pendingFrom=null;
+  document.querySelectorAll('.agent-row').forEach(function(el,i){el.classList.toggle('active-row',i===ri);});
   renderAvailableSlots();
 }
-
 function clickAvailSlot(t){
   if(activeRow<0||rows[activeRow].agentIdx<0){
     var grid=document.getElementById('avail-grid');
     if(grid){grid.style.outline='2px solid var(--warning)';setTimeout(function(){grid.style.outline='';},800);}
     return;
   }
-
   if(pendingFrom){
     var ri=pendingFrom.ri,si=pendingFrom.si;
-    var fromM=toMins(pendingFrom.time),toM=toMins(t);
-    if(toM<=fromM)toM+=1440;
+    var fromM=toMins(pendingFrom.time),toM=toMins(t);if(toM<=fromM)toM+=1440;
     var dur=toM-fromM;
-    // Validate duration and overlap (same rules as commitTime)
     var otherMins=rows[ri].slots.reduce(function(a,s,idx){return idx!==si?a+slotDur(s):a;},0);
     var budget=Math.max(0,MAX_BREAK-otherMins);
     if(dur<=0||dur>budget||wouldCauseOverlap(ri,si,fromM,toM)){
-      pendingFrom=null;
-      rows[ri].slots[si].from='';
+      pendingFrom=null;rows[ri].slots[si].from='';
       var fwrap=document.getElementById('fw-'+ri+'-'+si);
       if(fwrap){var segs=fwrap.querySelectorAll('.time-seg');segs[0].value='';segs[1].value='';}
-      pushRows();render();renderAvailableSlots();
-      return;
+      pushRows();render();renderAvailableSlots();return;
     }
     rows[ri].slots[si].to=t;
     var twrap=document.getElementById('tw-'+ri+'-'+si);
-    if(twrap){
-      var segs=twrap.querySelectorAll('.time-seg');
-      var parts=t.split(':');
-      if(segs[0])segs[0].value=parts[0];
-      if(segs[1])segs[1].value=parts[1];
-    }
-    pendingFrom=null;
-    pushRows();render();
-    return;
+    if(twrap){var segs=twrap.querySelectorAll('.time-seg');var parts=t.split(':');if(segs[0])segs[0].value=parts[0];if(segs[1])segs[1].value=parts[1];}
+    pendingFrom=null;pushRows();render();return;
   }
-
-  // First click = FROM
   var ri=activeRow,targetSi=-1;
-  for(var si=0;si<rows[ri].slots.length;si++){
-    if(!rows[ri].slots[si].from&&!rows[ri].slots[si].to){targetSi=si;break;}
-  }
+  for(var si=0;si<rows[ri].slots.length;si++){if(!rows[ri].slots[si].from&&!rows[ri].slots[si].to){targetSi=si;break;}}
   if(targetSi<0)return;
-
-  rows[ri].slots[targetSi].from=t;
-  rows[ri].slots[targetSi].to='';
+  rows[ri].slots[targetSi].from=t;rows[ri].slots[targetSi].to='';
   var fwrap=document.getElementById('fw-'+ri+'-'+targetSi);
-  if(fwrap){
-    var segs=fwrap.querySelectorAll('.time-seg');
-    var parts=t.split(':');
-    if(segs[0])segs[0].value=parts[0];
-    if(segs[1])segs[1].value=parts[1];
-  }
+  if(fwrap){var segs=fwrap.querySelectorAll('.time-seg');var parts=t.split(':');if(segs[0])segs[0].value=parts[0];if(segs[1])segs[1].value=parts[1];}
   var twrap=document.getElementById('tw-'+ri+'-'+targetSi);
   if(twrap){var segs=twrap.querySelectorAll('.time-seg');segs[0].value='';segs[1].value='';}
-  pendingFrom={ri:ri,si:targetSi,time:t};
-  pushRows();render();
-  renderAvailableSlots();
+  pendingFrom={ri:ri,si:targetSi,time:t};pushRows();render();renderAvailableSlots();
 }
 
-// ═══════════════════════════════════════════════════════════════
+function buildDropdownItems(ri,selIdx){
+  var used=new Set(rows.map(function(r){return r.agentIdx;}).filter(function(i){return i>=0;}));
+  var html='<div class="agent-dropdown-item placeholder" onclick="selectAgent('+ri+',-1)">— select agent —</div>';
+  agents.forEach(function(name,i){
+    if(!name.trim())return;if(used.has(i)&&i!==selIdx)return;
+    html+='<div class="agent-dropdown-item'+(i===selIdx?' selected':'')+'" onclick="selectAgent('+ri+','+i+')">'+name+'</div>';
+  });
+  return html;
+}
+function toggleDropdown(ri){
+  document.querySelectorAll('.agent-dropdown-menu.open').forEach(function(m){if(m.id!=='dd-menu-'+ri)m.classList.remove('open');});
+  var menu=document.getElementById('dd-menu-'+ri);if(!menu)return;
+  menu.classList.toggle('open');
+  if(menu.classList.contains('open')){var inp=document.getElementById('dd-search-'+ri);if(inp){inp.value='';filterDropdown(ri,'');setTimeout(function(){inp.focus();},50);}}
+}
+function filterDropdown(ri,query){
+  var list=document.getElementById('dd-list-'+ri);if(!list)return;
+  var q=query.toLowerCase().trim();
+  list.querySelectorAll('.agent-dropdown-item').forEach(function(item){if(!q||item.textContent.toLowerCase().includes(q)){item.classList.remove('hidden');}else{item.classList.add('hidden');}});
+}
+function selectAgent(ri,idx){
+  rows[ri].agentIdx=parseInt(idx);
+  var label=document.getElementById('dd-label-'+ri);
+  if(label){label.textContent=idx>=0&&agents[idx]?agents[idx]:'— select agent —';}
+  var menu=document.getElementById('dd-menu-'+ri);if(menu)menu.classList.remove('open');
+  if(parseInt(idx)>=0){activeRow=ri;pendingFrom=null;}
+  pushRows();render();
+}
+document.addEventListener('click',function(e){if(!e.target.closest('.agent-dropdown')){document.querySelectorAll('.agent-dropdown-menu.open').forEach(function(m){m.classList.remove('open');});}});
+
 function render(){
-  var left=document.getElementById('break-table-left');
-  var right=document.getElementById('break-table-right');
+  var left=document.getElementById('break-table-left'),right=document.getElementById('break-table-right');
   if(!left||!right)return;
   left.innerHTML='';right.innerHTML='';
   var onBreakCount=countOnBreakNow();
   rows.forEach(function(row,ri){
-    var used=rowUsedMins(row);
-    var pct=Math.min(100,(used/MAX_BREAK)*100);
-    var barCls=used>=MAX_BREAK?'full':'';
+    var used=rowUsedMins(row),pct=Math.min(100,(used/MAX_BREAK)*100),barCls=used>=MAX_BREAK?'full':'';
     var anyBreak=row.agentIdx>=0&&row.slots.some(function(s){return slotStatus(s)==='break';});
     var allFinished=row.agentIdx>=0&&rowFinished(row);
     var wrap=document.createElement('div');
     wrap.className='agent-row'+(anyBreak?' any-on-break':(allFinished&&!anyBreak?' full-done':''))+(ri===activeRow?' active-row':'');
     wrap.innerHTML=
-      '<div class="agent-header" onclick="setActiveRow('+ri+')" style="cursor:pointer;" title="Click to select this row for break slot filling">'+
+      '<div class="agent-header" onclick="setActiveRow('+ri+')" style="cursor:pointer;" title="Click to select this row">'+
         '<span class="agent-row-num">'+(ri+1)+'</span>'+
         '<div class="agent-dropdown" id="dd-'+ri+'">'+
           '<div class="agent-dropdown-trigger" onclick="toggleDropdown('+ri+')">'+
@@ -613,46 +664,30 @@ function render(){
       else if(status==='done')pill='<span class="status-pill pill-done"><span class="dot"></span>DONE '+dur+'m</span>';
       else if(status==='upcoming'&&dur)pill='<span class="status-pill pill-upcoming">'+dur+' min · upcoming</span>';
       else if(dur)pill='<span class="status-pill pill-idle">'+dur+' min</span>';
-      var otherMins=row.slots.reduce(function(a,s,idx){return idx!==si?a+slotDur(s):a;},0);
-      var budgetLeft=Math.max(0,MAX_BREAK-otherMins);
-      var cutoff=toMins(shiftCutoff());
-      var fromMins=slot.from?toMins(slot.from):undefined;
-      var blockedFroms=getBlockedFromTimes(ri,si);
-      var sd=document.createElement('div');sd.className='break-slot';
+      var allBlocked=false;
+      if(!slot.from&&!slot.to){var bf=getBlockedFromTimes(ri,si);allBlocked=ALL_TIMES.every(function(t){return bf[t];});}
       var canStart=slot.from&&slot.to&&!slot.started&&status!=='done';
       var isOnBreak=slot.started&&status==='break';
       var actionBtns='';
-      if(isOnBreak){
-        actionBtns='<button class="start-break-btn" style="opacity:0.3;cursor:default;pointer-events:none;">▶ Start</button>'+
-                   '<button class="stop-break-btn" onclick="stopBreakNow('+ri+','+si+')">■ Stop</button>';
-      } else if(canStart){
-        actionBtns='<button class="start-break-btn" onclick="startBreakNow('+ri+','+si+')">▶ Start</button>';
-      }
+      if(isOnBreak){actionBtns='<button class="start-break-btn" style="opacity:0.3;cursor:default;pointer-events:none;">▶ Start</button><button class="stop-break-btn" onclick="stopBreakNow('+ri+','+si+')">■ Stop</button>';}
+      else if(canStart){actionBtns='<button class="start-break-btn" onclick="startBreakNow('+ri+','+si+')">▶ Start</button>';}
       var fH=slot.from?slot.from.split(':')[0]:'',fM=slot.from?slot.from.split(':')[1]:'';
       var tH=slot.to?slot.to.split(':')[0]:'',tMM=slot.to?slot.to.split(':')[1]:'';
-      // Check if this empty slot is blocked (no valid time can be entered due to 2/2 full)
-      var isBlocked=!slot.from&&!slot.to&&getBlockedFromTimes(ri,si);
-      var allBlocked=false;
-      if(!slot.from&&!slot.to){
-        var bf=getBlockedFromTimes(ri,si);
-        allBlocked=ALL_TIMES.every(function(t){return bf[t];});
-      }
-      var disAttr=allBlocked?' disabled title="No available slots — 2 agents already cover all times"':'';
+      var sd=document.createElement('div');sd.className='break-slot';
       sd.innerHTML=
         '<span class="slot-label" style="'+(allBlocked?'opacity:0.35':'')+'">Break '+(si+1)+'</span>'+
         '<div class="time-input-wrap'+(allBlocked?' avail-inactive':'')+'" id="fw-'+ri+'-'+si+'" style="'+(allBlocked?'opacity:0.35;pointer-events:none':'')+'">'+
           '<input class="time-seg" type="text" maxlength="2" placeholder="--" value="'+fH+'" oninput="autoTab(this)" onblur="commitTime('+ri+','+si+',\'from\')"/>'+
           '<span class="time-colon">:</span>'+
-          '<input class="time-seg" id="fw-'+ri+'-'+si+'-m" type="text" maxlength="2" placeholder="--" value="'+fM+'" onblur="commitTime('+ri+','+si+',\'from\')"/>'+
+          '<input class="time-seg" type="text" maxlength="2" placeholder="--" value="'+fM+'" onblur="commitTime('+ri+','+si+',\'from\')"/>'+
         '</div>'+
         '<span class="sep">→</span>'+
         '<div class="time-input-wrap'+(allBlocked?' avail-inactive':'')+'" id="tw-'+ri+'-'+si+'" style="'+(allBlocked?'opacity:0.35;pointer-events:none':'')+'">'+
           '<input class="time-seg" type="text" maxlength="2" placeholder="--" value="'+tH+'" oninput="autoTab(this)" onblur="commitTime('+ri+','+si+',\'to\')"/>'+
           '<span class="time-colon">:</span>'+
-          '<input class="time-seg" id="tw-'+ri+'-'+si+'-m" type="text" maxlength="2" placeholder="--" value="'+tMM+'" onblur="commitTime('+ri+','+si+',\'to\')"/>'+
+          '<input class="time-seg" type="text" maxlength="2" placeholder="--" value="'+tMM+'" onblur="commitTime('+ri+','+si+',\'to\')"/>'+
         '</div>'+
-        pill+
-        actionBtns+
+        pill+actionBtns+
         '<button class="slot-clear-btn" onclick="clearSlot('+ri+','+si+')"'+(canClear?'':' disabled')+'>Clear</button>';
       slotsDiv.appendChild(sd);
     });
@@ -660,168 +695,37 @@ function render(){
   updateStats(onBreakCount);checkOverlap(onBreakCount);renderAvailableSlots();
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  DATA SETTERS
-// ═══════════════════════════════════════════════════════════════
-function buildDropdownItems(ri, selIdx){
-  var used=new Set(rows.map(function(r){return r.agentIdx;}).filter(function(i){return i>=0;}));
-  var html='<div class="agent-dropdown-item placeholder" onclick="selectAgent('+ri+',-1)">— select agent —</div>';
-  agents.forEach(function(name,i){
-    if(!name.trim())return;
-    if(used.has(i)&&i!==selIdx)return;
-    html+='<div class="agent-dropdown-item'+(i===selIdx?' selected':'')+'" onclick="selectAgent('+ri+','+i+')">'+name+'</div>';
-  });
-  return html;
-}
-
-function toggleDropdown(ri){
-  // Close all others first
-  document.querySelectorAll('.agent-dropdown-menu.open').forEach(function(m){
-    if(m.id!=='dd-menu-'+ri)m.classList.remove('open');
-  });
-  var menu=document.getElementById('dd-menu-'+ri);
-  if(!menu)return;
-  menu.classList.toggle('open');
-  if(menu.classList.contains('open')){
-    var inp=document.getElementById('dd-search-'+ri);
-    if(inp){inp.value='';filterDropdown(ri,'');setTimeout(function(){inp.focus();},50);}
-  }
-}
-
-function filterDropdown(ri, query){
-  var list=document.getElementById('dd-list-'+ri);
-  if(!list)return;
-  var q=query.toLowerCase().trim();
-  list.querySelectorAll('.agent-dropdown-item').forEach(function(item){
-    if(!q||item.textContent.toLowerCase().includes(q)){item.classList.remove('hidden');}
-    else{item.classList.add('hidden');}
-  });
-}
-
-function setAgent(ri,val){rows[ri].agentIdx=parseInt(val);pushRows();render();}
-
-function selectAgent(ri, idx){
-  rows[ri].agentIdx=parseInt(idx);
-  // Update label immediately without waiting for re-render
-  var label=document.getElementById('dd-label-'+ri);
-  if(label){
-    var name=idx>=0&&agents[idx]?agents[idx]:'— select agent —';
-    label.textContent=name;
-  }
-  var menu=document.getElementById('dd-menu-'+ri);
-  if(menu)menu.classList.remove('open');
-  pushRows();render();
-}
-
-// Close dropdowns when clicking outside
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.agent-dropdown')){
-    document.querySelectorAll('.agent-dropdown-menu.open').forEach(function(m){m.classList.remove('open');});
-  }
-});
-
-
-
-function parseTimeInput(val){
-  val=val.trim().replace(/[^0-9:]/g,'');
-  // accept formats: HH:MM or HHMM
-  var m;
-  if((m=val.match(/^(\d{1,2}):(\d{2})$/))){
-    var h=parseInt(m[1]),mn=parseInt(m[2]);
-    if(h>=0&&h<24&&mn>=0&&mn<60)return pad(h)+':'+pad(mn);
-  }
-  if((m=val.match(/^(\d{3,4})$/))){
-    var s=val.padStart(4,'0');
-    var h=parseInt(s.slice(0,2)),mn=parseInt(s.slice(2));
-    if(h>=0&&h<24&&mn>=0&&mn<60)return pad(h)+':'+pad(mn);
-  }
-  return null;
-}
-
 function autoTab(el){
   if(el.value.length>=2){
-    var wrap=el.closest('.time-input-wrap');
-    var inputs=wrap.querySelectorAll('input.time-seg');
-    for(var i=0;i<inputs.length-1;i++){
-      if(inputs[i]===el){
-        inputs[i+1].focus();
-        inputs[i+1].select();
-        break;
-      }
-    }
+    var wrap=el.closest('.time-input-wrap'),inputs=wrap.querySelectorAll('input.time-seg');
+    for(var i=0;i<inputs.length-1;i++){if(inputs[i]===el){inputs[i+1].focus();inputs[i+1].select();break;}}
   }
 }
 
 function commitTime(ri,si,field){
   var prefix=field==='from'?'fw-':'tw-';
-  var wrap=document.getElementById(prefix+ri+'-'+si);
-  if(!wrap)return;
+  var wrap=document.getElementById(prefix+ri+'-'+si);if(!wrap)return;
   var segs=wrap.querySelectorAll('.time-seg');
   var h=segs[0].value.trim(),m=segs[1].value.trim();
-
-  // Both empty = clear the field
-  if(!h&&!m){
-    rows[ri].slots[si][field]='';
-    pushRows();render();return;
-  }
-  // One missing = invalid, don't save
+  if(!h&&!m){rows[ri].slots[si][field]='';pushRows();render();return;}
   if(!h||!m){wrap.classList.add('invalid');return;}
-
   var hN=parseInt(h),mN=parseInt(m);
-  if(isNaN(hN)||hN<0||hN>23||isNaN(mN)||mN<0||mN>59){
-    wrap.classList.add('invalid');
-    segs[0].value='';segs[1].value='';
-    return;
-  }
+  if(isNaN(hN)||hN<0||hN>23||isNaN(mN)||mN<0||mN>59){wrap.classList.add('invalid');segs[0].value='';segs[1].value='';return;}
   wrap.classList.remove('invalid');
   var val=pad(hN)+':'+pad(mN);
-
-  // Reject if time falls in last 30 min of current shift (cutoff zone)
-  var cutoffM=toMins(shiftCutoff());
-  var valM=toMins(val);
-  // Determine shift boundaries to check if valM is in cutoff zone
-  var kyivH=kyivHour();
-  var shiftEndM;
-  if(kyivH>=7&&kyivH<15)shiftEndM=15*60;
-  else if(kyivH>=15&&kyivH<23)shiftEndM=23*60;
-  else shiftEndM=7*60;
-  // cutoff = shiftEnd - 30min; block if from/to >= cutoff
-  if(field==='from'&&valM>=cutoffM&&valM<shiftEndM){
-    wrap.classList.add('invalid');
-    segs[0].value='';segs[1].value='';
-    setTimeout(function(){wrap.classList.remove('invalid');},1500);
-    return;
-  }
-  if(field==='to'&&valM>cutoffM&&valM<=shiftEndM){
-    wrap.classList.add('invalid');
-    segs[0].value='';segs[1].value='';
-    setTimeout(function(){wrap.classList.remove('invalid');},1500);
-    return;
-  }
-
-  // Temporarily store value and check overlap only when BOTH from+to are set
-  var prevVal=rows[ri].slots[si][field];
+  var cutoffM=toMins(shiftCutoff()),valM=toMins(val),kyivH=kyivHour(),shiftEndM;
+  if(kyivH>=7&&kyivH<15)shiftEndM=15*60;else if(kyivH>=15&&kyivH<23)shiftEndM=23*60;else shiftEndM=7*60;
+  if(field==='from'&&valM>=cutoffM&&valM<shiftEndM){wrap.classList.add('invalid');segs[0].value='';segs[1].value='';setTimeout(function(){wrap.classList.remove('invalid');},1500);return;}
+  if(field==='to'&&valM>cutoffM&&valM<=shiftEndM){wrap.classList.add('invalid');segs[0].value='';segs[1].value='';setTimeout(function(){wrap.classList.remove('invalid');},1500);return;}
   rows[ri].slots[si][field]=val;
-
   var slot=rows[ri].slots[si];
   if(slot.from&&slot.to){
-    var fM=toMins(slot.from),tM2=toMins(slot.to);
-    if(tM2<=fM)tM2+=1440;
+    var fM=toMins(slot.from),tM2=toMins(slot.to);if(tM2<=fM)tM2+=1440;
     var dur=tM2-fM;
-    // Reject if would cause 3+ concurrent overlap or exceed total 60min budget
     var otherMins=rows[ri].slots.reduce(function(a,s,idx){return idx!==si?a+slotDur(s):a;},0);
     var budget=Math.max(0,MAX_BREAK-otherMins);
-    if(dur>budget||fM===tM2||wouldCauseOverlap(ri,si,fM,tM2)){
-      // Reject — clear just the field that was just set
-      rows[ri].slots[si][field]='';
-      segs[0].value='';segs[1].value='';
-      wrap.classList.add('invalid');
-      setTimeout(function(){wrap.classList.remove('invalid');},1500);
-      return;
-    }
+    if(dur>budget||fM===tM2||wouldCauseOverlap(ri,si,fM,tM2)){rows[ri].slots[si][field]='';segs[0].value='';segs[1].value='';wrap.classList.add('invalid');setTimeout(function(){wrap.classList.remove('invalid');},1500);return;}
   }
-
-  // Valid — check budget
   if(field==='from'&&rows[ri].slots[si].to){
     var otherMins=rows[ri].slots.reduce(function(a,s,idx){return idx!==si?a+slotDur(s):a;},0);
     var budget=Math.max(0,MAX_BREAK-otherMins);
@@ -831,47 +735,27 @@ function commitTime(ri,si,field){
   pushRows();render();
 }
 
-function setFromText(ri,si,el){} // legacy stub
-function setToText(ri,si,el){}   // legacy stub
-
 function startBreakNow(ri,si){
-  var slot=rows[ri].slots[si];
-  if(!slot.from||!slot.to)return;
+  var slot=rows[ri].slots[si];if(!slot.from||!slot.to)return;
   var dur=toMins(slot.to)-toMins(slot.from);if(dur<0)dur+=1440;
-  var nowM=kyivNowMins();
-  var nowH=Math.floor(nowM/60),nowMin=Math.floor(nowM%60);
-  var newFrom=pad(nowH)+':'+pad(nowMin);
-  var newToM=Math.floor(nowM)+dur;
+  var nowM=kyivNowMins(),nowH=Math.floor(nowM/60),nowMin=Math.floor(nowM%60);
+  var newFrom=pad(nowH)+':'+pad(nowMin),newToM=Math.floor(nowM)+dur;
   var newToH=Math.floor(newToM/60)%24,newToMin=Math.floor(newToM%60);
-  var newTo=pad(newToH)+':'+pad(newToMin);
-  rows[ri].slots[si].from=newFrom;
-  rows[ri].slots[si].to=newTo;
-  rows[ri].slots[si].started=true;
+  rows[ri].slots[si].from=newFrom;rows[ri].slots[si].to=pad(newToH)+':'+pad(newToMin);rows[ri].slots[si].started=true;
   pushRows();render();
 }
 function stopBreakNow(ri,si){
-  var slot=rows[ri].slots[si];
-  if(!slot.from)return;
-  var nowM=kyivNowMins();
-  var nowH=Math.floor(nowM/60),nowMin=Math.floor(nowM%60);
-  var newTo=pad(nowH)+':'+pad(nowMin);
-  rows[ri].slots[si].to=newTo;
-  rows[ri].slots[si].started=false;
+  var nowM=kyivNowMins(),nowH=Math.floor(nowM/60),nowMin=Math.floor(nowM%60);
+  rows[ri].slots[si].to=pad(nowH)+':'+pad(nowMin);rows[ri].slots[si].started=false;
   pushRows();render();
 }
 function clearSlot(ri,si){rows[ri].slots[si]={from:'',to:'',started:false};pushRows();render();}
 function clearAll(){
-  for(var i=0;i<rows.length;i++){
-    rows[i].agentIdx=-1;
-    rows[i].slots=[{from:'',to:'',started:false},{from:'',to:'',started:false},{from:'',to:'',started:false}];
-  }
+  for(var i=0;i<rows.length;i++){rows[i].agentIdx=-1;rows[i].slots=[{from:'',to:'',started:false},{from:'',to:'',started:false},{from:'',to:'',started:false}];}
   pushRows();render();
 }
 function clearRow(ri){rows[ri].agentIdx=-1;rows[ri].slots=[{from:'',to:'',started:false},{from:'',to:'',started:false},{from:'',to:'',started:false}];pushRows();render();}
 
-// ═══════════════════════════════════════════════════════════════
-//  STATS
-// ═══════════════════════════════════════════════════════════════
 function updateStats(onBreakCount){
   document.getElementById('stat-on-break').textContent=onBreakCount;
   document.getElementById('stat-done').textContent=rows.filter(function(r){return rowFinished(r);}).length;
@@ -884,15 +768,11 @@ function checkOverlap(onBreakCount){
   else b.classList.remove('visible');
 }
 
-// ═══════════════════════════════════════════════════════════════
-//  AGENT SETUP
-// ═══════════════════════════════════════════════════════════════
 function renderSetup(){
   var grid=document.getElementById('agents-grid');if(!grid)return;grid.innerHTML='';
   for(var i=0;i<40;i++){
     var w=document.createElement('div');w.className='agent-input-wrap';
-    w.innerHTML='<span class="agent-num">'+String(i+1).padStart(2,'0')+'</span>'+
-      '<input type="text" value="'+(agents[i]||'').replace(/"/g,'&quot;')+'" placeholder="Agent name" data-idx="'+i+'"/>';
+    w.innerHTML='<span class="agent-num">'+String(i+1).padStart(2,'0')+'</span><input type="text" value="'+(agents[i]||'').replace(/"/g,'&quot;')+'" placeholder="Agent name" data-idx="'+i+'"/>';
     grid.appendChild(w);
   }
 }
@@ -903,13 +783,13 @@ function saveAgents(){
   pushRows();render();alert('Agents saved & synced!');
 }
 document.getElementById('setup-toggle').addEventListener('click',function(){
-  this.classList.toggle('collapsed');
-  document.getElementById('setup-content').classList.toggle('hidden');
+  this.classList.toggle('collapsed');document.getElementById('setup-content').classList.toggle('hidden');
 });
 
-// ═══════════════════════════════════════════════════════════════
-//  CLOCK
-// ═══════════════════════════════════════════════════════════════
+/* ── GUIDE ── */
+function openGuide(){document.getElementById('guide-overlay').className='guide-overlay open';}
+function closeGuide(){document.getElementById('guide-overlay').className='guide-overlay closed';}
+
 function updateClock(){
   document.getElementById('clock').textContent=kyivTimeStr();
   document.getElementById('shift-label').textContent=currentShift();
@@ -918,8 +798,6 @@ function updateClock(){
 setInterval(updateClock,1000);
 setInterval(render,10000);
 updateClock();
-
-// ── GO! ──
 initApp();
 </script>
 </body>
