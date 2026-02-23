@@ -583,6 +583,8 @@ function filterDropdown(ri, query){
   });
 }
 
+function setAgent(ri,val){rows[ri].agentIdx=parseInt(val);pushRows();render();}
+
 function selectAgent(ri, idx){
   setAgent(ri, idx);
   var menu=document.getElementById('dd-menu-'+ri);
